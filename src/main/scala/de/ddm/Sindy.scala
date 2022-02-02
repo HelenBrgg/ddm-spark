@@ -62,6 +62,6 @@ object Sindy {
       .filter(t => t._2.size > 1) // drop entries for which no INDs were found
       
       // 6. Write
-      .collect.foreach(println) // print the resulting unary INDs to stdout
+      .collect.foreach(t => println(t._1 + " < " + t._2.mkString(", "))) // print the resulting unary INDs to stdout
   }
 }
