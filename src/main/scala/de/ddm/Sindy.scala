@@ -47,7 +47,7 @@ object Sindy {
     inputs.map(input => readValueAttributePairs(input, spark)) // read all datasets as (a, A)
       .reduce((ds1, ds2) => ds1.union(ds2)) // append all rows together
       .rdd // we now want to use RDD methods
-      .map(t => (t._1, Set(t._2))) // (a, A) => (a, {A})
+      .map(t => (t._1, Set(t._2))) // wrap attribute so we can use it in reduceByKey: (a, A) => (a, {A})
 
       // 3. GroupBy+Aggregate
       .reduceByKey((set1, set2) => set1 ++ set2) // where does the value occur: (a, {A}), (a, {B}) => (a, {A, B})
@@ -62,6 +62,7 @@ object Sindy {
       .filter(t => t._2.size > 1) // drop entries for which no INDs were found
       
       // 6. Write
-      .collect.foreach(t => println(t._1 + " < " + t._2.mkString(", "))) // print the resulting unary INDs to stdout
+      .sortByKey() // sort in lexicographical order by dependent attribute: (A, {...}), (B, {...})
+      .foreach(t => println(t._1 + " < " + t._2.mkString(", "))) // print the resulting unary INDs to stdout
   }
 }
